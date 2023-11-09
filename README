@@ -1,0 +1,65 @@
+packserv.py -   tRPC (tHA) packet server application.
+
+    The packet server connects to a serial (COM) port and parses the data stream for valid
+    tekmar packets (tpcks).  The packet server then forwards all valid packets it has received
+    from the serial port to all socket connections.  The packet server also listens for valid
+    tpcks from the socket connections and then writes the tpcks that it has received to the
+    serial port.
+
+    Example command line usage:
+        python packserv.py /dev/com7 localhost 55444
+
+    The packet server above is connected to COM port 7 and listening on localhost, port 55444
+    for socket connections.
+
+trpc_msg.py -   tRPC (tHA) message formatting module.
+
+    This module is an implmentation of the trpc/tHA protocol
+
+    Example usage:
+        see trpc_sock.py example below.
+
+trpc_sock.py -   tRPC (tHA) packet/socket abstraction module.
+
+    This module is used for connecting to the packet server described above and it uses the
+    settings (host address and port) configured in get_trpc_host.py module.
+
+    Example usage:
+        import trpc_sock
+        import trpc_msg
+
+        sock = trpc_sock.TrpcSocket()
+        sock.open()
+        p = trpc_msg.TrpcPacket(service = 'Request', method = 'HeatSetpoint', address = 1001)
+        sock.write(p)
+        sock.close()
+
+        p = sock.read()
+        if p != None:
+            service_id = p.header["serviceID"]
+            method_id = p.header["methodID"]
+            address = p.body["address"]
+
+get_trpc_host.py -   Configure the host address and port for the packet server.
+
+    THis module is used to configure the host address and port parameters used by the
+    trpc_sock.py module.  It also allows for environment variables TRPC_HOST and TRPC_PORT to
+    be used for configuration.  
+
+trpc_receive.py -   tRPC (tHA) packet/socket viewer.
+
+    This module connects to a packet server and displays all valid trpc packets that it
+    receives.  In other words this prints out all trpc packets received from the serial port
+    connected to the packet server.
+
+tpck.py -   tpck protocol implementation module.
+packet.py -   Packet formatting module.
+fields.py -   Packed binary field handling module.
+
+tha_demo.py -   A stand-alone implementation of the tHA stack.
+
+    This file can be broken down in to two section, the first contains an implementation
+    of the tHA stack, although all of the accesors for the tHA parameters are not implemented.
+    The second is another implementation of the trpc_receive.py, except that it is a direct
+    connection to the serial port instead of through the packet server.
+
